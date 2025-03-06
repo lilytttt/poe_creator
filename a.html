@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Models Showcase</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#5D5CDE',
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-in',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        .card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .dark .card:hover {
+            box-shadow: 0 10px 20px rgba(255,255,255,0.05);
+        }
+    </style>
+</head>
+<body class="bg-white dark:bg-gray-900 min-h-screen transition duration-300">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header Section -->
+        <header class="mb-12 text-center">
+            <h1 class="text-4xl font-bold text-gray-800 dark:text-white mb-4">My Models Showcase</h1>
+            <p class="text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+                A collection of my AI models and their capabilities. Each card showcases a different model with its key features and specifications.
+            </p>
+        </header>
+
+        <!-- Models Grid -->
+        <div id="models-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
+            <!-- Cards will be dynamically added here -->
+        </div>
+
+
+    </div>
+
+    <script>
+        // Check for dark mode preference
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.classList.add('dark');
+        }
+        
+        // Listen for changes in dark mode preference
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+            if (event.matches) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        });
+
+        // Sample models data
+        const sampleModels = [
+            {
+                name: "TextAI Pro",
+                description: "A powerful text generation model capable of writing high-quality content across various domains.",
+                type: "Text",
+                size: "13B",
+                release: "2023-09-15",
+                color: "#5D5CDE"
+            },
+            {
+                name: "ImageGen X",
+                description: "State-of-the-art image generation model that creates photorealistic images from text descriptions.",
+                type: "Image",
+                size: "7B",
+                release: "2023-11-20",
+                color: "#3ABFF8"
+            },
+            {
+                name: "VoiceClone Ultra",
+                description: "Advanced voice synthesis model that can clone voices with just a few seconds of audio input.",
+                type: "Audio",
+                size: "5B",
+                release: "2023-08-05",
+                color: "#36D399"
+            },
+            {
+                name: "VideoFormer",
+                description: "Cutting-edge video generation model capable of creating realistic video clips from text prompts.",
+                type: "Video",
+                size: "21B",
+                release: "2023-12-10",
+                color: "#F87272"
+            },
+            {
+                name: "MultiModal Master",
+                description: "Versatile model that can process and generate text, images, and audio in an integrated fashion.",
+                type: "Multimodal",
+                size: "42B",
+                release: "2024-01-30",
+                color: "#FBBD23"
+            }
+        ];
+
+        // Function to generate icon HTML based on model type
+        function getIconForType(type) {
+            const icons = {
+                'Text': '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>',
+                'Image': '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>',
+                'Audio': '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" /></svg>',
+                'Video': '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>',
+                'Multimodal': '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" /></svg>'
+            };
+            
+            return icons[type] || icons['Text'];
+        }
+
+        // Function to create and append a model card
+        function createModelCard(model) {
+            const modelsContainer = document.getElementById('models-container');
+            
+            const cardHtml = `
+                <div class="card bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-md animate-fade-in">
+                    <div class="h-2" style="background-color: ${model.color}"></div>
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-xl font-bold text-gray-800 dark:text-white">${model.name}</h3>
+                            <span class="p-2 rounded-full" style="background-color: ${model.color}20">
+                                ${getIconForType(model.type)}
+                            </span>
+                        </div>
+                        <p class="text-gray-600 dark:text-gray-300 mb-4">${model.description}</p>
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            <span class="px-3 py-1 bg-gray-100 dark:bg-gray-700 rounded-full text-sm text-gray-800 dark:text-gray-200">
+                                ${model.type}
+                            </span>
+                            ${model.size ? `
+                            <span class="px-3 py-1 bg-gray-100 dark:bg-gray-700 rounded-full text-sm text-gray-800 dark:text-gray-200">
+                                ${model.size} parameters
+                            </span>
+                            ` : ''}
+                        </div>
+                        <div class="text-sm text-gray-500 dark:text-gray-400">
+                            Released: ${model.release ? new Date(model.release).toLocaleDateString() : 'N/A'}
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Add the new card to the container
+            modelsContainer.innerHTML += cardHtml;
+        }
+
+        // Populate sample models
+        window.onload = function() {
+            sampleModels.forEach(createModelCard);
+        };
+    </script>
+</body>
+</html>
