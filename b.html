@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Models Showcase</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#5D5CDE',
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-in',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        .card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .dark .card:hover {
+            box-shadow: 0 10px 20px rgba(255,255,255,0.05);
+        }
+    </style>
+</head>
+<body class="bg-white dark:bg-gray-900 min-h-screen transition duration-300">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header Section -->
+        <header class="mb-12 text-center">
+            <h1 class="text-4xl font-bold text-gray-800 dark:text-white mb-4">My Models Showcase</h1>
+            <p class="text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+                A collection of my AI models and their capabilities. Each card showcases a different model with its key features and specifications.
+            </p>
+        </header>
+
+        <!-- Models Grid -->
+        <div id="models-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
+            <!-- Cards will be dynamically added here -->
+        </div>
+
+
+    </div>
+
+    <script>
+        // Check for dark mode preference
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.classList.add('dark');
+        }
+        
+        // Listen for changes in dark mode preference
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+            if (event.matches) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        });
+
+        // Default colors for different model types
+        const typeColors = {
+            'Text': '#5D5CDE',
+            'Image': '#3ABFF8',
+            'Audio': '#36D399',
+            'Video': '#F87272',
+            'Multimodal': '#FBBD23',
+            'default': '#5D5CDE'
+        };
+
+        // Function to generate icon HTML based on model type
+        function getIconForType(type) {
+            const icons = {
+                'Text': '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>',
+                'Image': '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>',
+                'Audio': '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" /></svg>',
+                'Video': '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>',
+                'Multimodal': '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" /></svg>'
+            };
+            
+            return icons[type] || icons['Text'];
+        }
+
+        // Function to create and append a model card
+        function createModelCard(model) {
+            const modelsContainer = document.getElementById('models-container');
+            
+            const cardHtml = `
+                <div class="card bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-md animate-fade-in">
+                    <div class="h-2" style="background-color: ${model.color}"></div>
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-xl font-bold text-gray-800 dark:text-white">${model.name}</h3>
+                            <span class="p-2 rounded-full" style="background-color: ${model.color}20">
+                                ${getIconForType(model.type)}
+                            </span>
+                        </div>
+                        <p class="text-gray-600 dark:text-gray-300 mb-4">${model.description}</p>
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            <span class="px-3 py-1 bg-gray-100 dark:bg-gray-700 rounded-full text-sm text-gray-800 dark:text-gray-200">
+                                ${model.type}
+                            </span>
+                            ${model.size ? `
+                            <span class="px-3 py-1 bg-gray-100 dark:bg-gray-700 rounded-full text-sm text-gray-800 dark:text-gray-200">
+                                ${model.size} parameters
+                            </span>
+                            ` : ''}
+                        </div>
+                        <div class="text-sm text-gray-500 dark:text-gray-400">
+                            Released: ${model.release ? new Date(model.release).toLocaleDateString() : 'N/A'}
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Add the new card to the container
+            modelsContainer.innerHTML += cardHtml;
+        }
+
+        // Function to fetch models from API and populate the container
+        async function fetchAndDisplayModels() {
+            const modelsContainer = document.getElementById('models-container');
+            
+            // Show loading state
+            modelsContainer.innerHTML = `
+                <div class="col-span-1 md:col-span-2 lg:col-span-3 text-center py-12">
+                    <div class="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+                    <p class="mt-4 text-gray-600 dark:text-gray-300">Loading models...</p>
+                </div>
+            `;
+            
+            try {
+                // Fetch models from API
+                const response = await fetch('my_ai/model_info');
+                
+                if (!response.ok) {
+                    throw new Error(`API request failed with status ${response.status}`);
+                }
+                
+                const models = await response.json();
+                
+                // Clear loading state
+                modelsContainer.innerHTML = '';
+                
+                if (models.length === 0) {
+                    modelsContainer.innerHTML = `
+                        <div class="col-span-1 md:col-span-2 lg:col-span-3 text-center py-12">
+                            <p class="text-gray-600 dark:text-gray-300">No models found.</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Process each model and create a card
+                models.forEach(model => {
+                    // Assign a color based on model type if not provided
+                    if (!model.color) {
+                        model.color = typeColors[model.type] || typeColors.default;
+                    }
+                    
+                    createModelCard(model);
+                });
+                
+            } catch (error) {
+                console.error('Error fetching models:', error);
+                modelsContainer.innerHTML = `
+                    <div class="col-span-1 md:col-span-2 lg:col-span-3 text-center py-12">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <p class="mt-4 text-red-600 dark:text-red-400">
+                            Error loading models: ${error.message}
+                        </p>
+                        <button id="retry-button" class="mt-4 px-4 py-2 bg-primary text-white rounded-lg hover:bg-opacity-90 transition">
+                            Retry
+                        </button>
+                    </div>
+                `;
+                
+                // Add retry button functionality
+                document.getElementById('retry-button')?.addEventListener('click', fetchAndDisplayModels);
+            }
+        }
+        
+        // Initialize the app when the page loads
+        window.onload = fetchAndDisplayModels;
+    </script>
+</body>
+</html>
