@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tool Collection</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            DEFAULT: '#5D5CDE',
+                            hover: '#4a49b1',
+                            dark: '#7e7df0'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen transition-colors duration-200">
+    <div class="container mx-auto p-4 max-w-6xl">
+        <header class="mb-8">
+            <h1 class="text-3xl font-bold text-center mb-2">Tool Collection</h1>
+            <p class="text-center text-gray-600 dark:text-gray-400">Browse and filter your tools</p>
+        </header>
+        
+        <div class="mb-6">
+            <div class="flex flex-wrap gap-2 mb-4 items-center">
+                <h2 class="text-xl font-semibold mr-2">Filter by Tag:</h2>
+                <div id="tagFilters" class="flex flex-wrap gap-2"></div>
+                <button id="clearFilters" class="text-primary dark:text-primary-dark hover:underline text-sm ml-auto">
+                    Clear Filters
+                </button>
+            </div>
+            <input type="text" id="searchInput" placeholder="Search tools..." 
+                class="w-full p-2 rounded border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-700 text-base">
+        </div>
+        
+        <div id="noToolsMatch" class="hidden text-center py-12 bg-gray-100 dark:bg-gray-800 rounded-lg">
+            <i class="fas fa-search text-gray-400 text-4xl mb-3"></i>
+            <p class="text-gray-500 dark:text-gray-400">No tools match your current filters.</p>
+        </div>
+        
+        <div id="toolCards" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+    </div>
+
+    <button id="darkModeToggle" class="fixed bottom-4 right-4 p-3 bg-gray-200 dark:bg-gray-700 rounded-full shadow-md hover:shadow-lg transition-all">
+        <i class="fas fa-moon dark:hidden"></i>
+        <i class="fas fa-sun hidden dark:block"></i>
+    </button>
+
+    <script>
+        // Dark mode detection and toggle
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.classList.add('dark');
+        }
+        
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+            if (event.matches) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        });
+        
+        document.getElementById('darkModeToggle').addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+        });
+        
+        // Define your tools here
+        const tools = [
+            {
+                name: "Visual Studio Code",
+                description: "A lightweight but powerful source code editor that runs on your desktop and is available for Windows, macOS and Linux.",
+                tags: ["development", "code editor", "free"]
+            },
+            {
+                name: "Figma",
+                description: "A collaborative interface design tool that enables teams to work together on creating, testing, and shipping designs.",
+                tags: ["design", "ui", "collaboration"]
+            },
+            {
+                name: "GitHub",
+                description: "A platform for version control and collaboration that lets you and others work together on projects from anywhere.",
+                tags: ["development", "version control", "collaboration"]
+            },
+            {
+                name: "Notion",
+                description: "An all-in-one workspace for notes, tasks, wikis, and databases. Helps teams collaborate and organize information.",
+                tags: ["productivity", "notes", "collaboration"]
+            },
+            {
+                name: "Adobe Photoshop",
+                description: "Industry-standard software for creating and enhancing photographs, illustrations, and 3D artwork.",
+                tags: ["design", "photo editing", "paid"]
+            },
+            {
+                name: "Trello",
+                description: "A visual collaboration tool that creates a shared perspective on any project. Organize tasks with boards, lists, and cards.",
+                tags: ["productivity", "project management", "collaboration"]
+            }
+        ];
+        
+        // Tool management
+        const activeFilters = new Set();
+        let allTags = new Set();
+        
+        function createToolCard(tool) {
+            const card = document.createElement('div');
+            card.className = 'bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden border border-gray-200 dark:border-gray-700 flex flex-col h-full';
+            
+            // Construct card content
+            card.innerHTML = `
+                <div class="p-5 flex-grow">
+                    <h3 class="text-xl font-bold mb-2 text-primary dark:text-primary-dark">${escapeHTML(tool.name)}</h3>
+                    <p class="text-gray-700 dark:text-gray-300 mb-4">${escapeHTML(tool.description)}</p>
+                    <div class="flex flex-wrap gap-2 mt-auto">
+                        ${tool.tags.map(tag => `
+                            <span class="tag-pill px-2 py-1 text-xs font-medium rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 cursor-pointer hover:bg-primary hover:text-white dark:hover:bg-primary-dark transition-colors" 
+                                  data-tag="${escapeHTML(tag)}">
+                                ${escapeHTML(tag)}
+                            </span>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+            
+            return card;
+        }
+        
+        function updateToolDisplay() {
+            const toolCardsContainer = document.getElementById('toolCards');
+            const noToolsMatch = document.getElementById('noToolsMatch');
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            
+            toolCardsContainer.innerHTML = '';
+            
+            // Filter tools based on active filters and search term
+            const filteredTools = tools.filter(tool => {
+                // Check if any tag filter is active and if tool has at least one of the active tags
+                const passesTagFilter = activeFilters.size === 0 || 
+                                      tool.tags.some(tag => activeFilters.has(tag.toLowerCase()));
+                
+                // Check if tool name or description contains search term
+                const passesSearch = tool.name.toLowerCase().includes(searchTerm) || 
+                                    tool.description.toLowerCase().includes(searchTerm) ||
+                                    tool.tags.some(tag => tag.toLowerCase().includes(searchTerm));
+                
+                return passesTagFilter && passesSearch;
+            });
+            
+            if (filteredTools.length === 0) {
+                noToolsMatch.classList.remove('hidden');
+                return;
+            } else {
+                noToolsMatch.classList.add('hidden');
+            }
+            
+            // Display filtered tools
+            filteredTools.forEach(tool => {
+                const card = createToolCard(tool);
+                toolCardsContainer.appendChild(card);
+            });
+            
+            // Add event listeners to tag pills
+            document.querySelectorAll('.tag-pill').forEach(pill => {
+                pill.addEventListener('click', (e) => {
+                    const tag = e.currentTarget.dataset.tag.toLowerCase();
+                    if (activeFilters.has(tag)) {
+                        activeFilters.delete(tag);
+                    } else {
+                        activeFilters.add(tag);
+                    }
+                    updateTagFilters();
+                    updateToolDisplay();
+                });
+            });
+        }
+        
+        function collectAllTags() {
+            allTags.clear();
+            tools.forEach(tool => {
+                tool.tags.forEach(tag => {
+                    allTags.add(tag.toLowerCase());
+                });
+            });
+            return [...allTags].sort();
+        }
+        
+        function updateTagFilters() {
+            const tagFiltersContainer = document.getElementById('tagFilters');
+            const sortedTags = collectAllTags();
+            
+            tagFiltersContainer.innerHTML = '';
+            
+            sortedTags.forEach(tag => {
+                const isActive = activeFilters.has(tag);
+                
+                const pillElement = document.createElement('span');
+                pillElement.className = `px-3 py-1 rounded-full text-sm font-medium cursor-pointer transition-colors ${
+                    isActive 
+                        ? 'bg-primary text-white' 
+                        : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+                }`;
+                pillElement.textContent = tag;
+                pillElement.dataset.tag = tag;
+                
+                pillElement.addEventListener('click', () => {
+                    if (activeFilters.has(tag)) {
+                        activeFilters.delete(tag);
+                    } else {
+                        activeFilters.add(tag);
+                    }
+                    updateTagFilters();
+                    updateToolDisplay();
+                });
+                
+                tagFiltersContainer.appendChild(pillElement);
+            });
+        }
+        
+        function escapeHTML(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+        
+        // Event listeners
+        document.getElementById('searchInput').addEventListener('input', updateToolDisplay);
+        
+        document.getElementById('clearFilters').addEventListener('click', () => {
+            activeFilters.clear();
+            document.getElementById('searchInput').value = '';
+            updateTagFilters();
+            updateToolDisplay();
+        });
+        
+        // Initial setup
+        updateToolDisplay();
+        updateTagFilters();
+    </script>
+</body>
+</html>
