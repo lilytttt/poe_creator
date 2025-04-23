@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MCP服务选择页面</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#5D5CDE',
+                    }
+                }
+            }
+        }
+
+        // Dark mode detection
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.classList.add('dark');
+        }
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+            if (event.matches) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        });
+    </script>
+    <style>
+        .gradient-bg {
+            background: linear-gradient(120deg, #4facfe 0%, #5D5CDE 100%);
+        }
+        .dark .gradient-bg {
+            background: linear-gradient(120deg, #30cfd0 0%, #5D5CDE 100%);
+            opacity: 0.8;
+        }
+        .service-item:hover {
+            background-color: rgba(93, 92, 222, 0.05);
+        }
+        .dark .service-item:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+    </style>
+</head>
+<body class="h-screen flex flex-col overflow-hidden bg-gray-100 dark:bg-gray-900">
+    <!-- Header with gradient background -->
+    <header class="gradient-bg text-white p-4 shadow-md">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="font-bold text-xl">全媒体写作辅助套件</h1>
+            <div class="flex space-x-4">
+                <button class="px-3 py-1 bg-white bg-opacity-20 rounded-md">正在编辑中</button>
+                <button class="px-3 py-1 bg-white bg-opacity-20 rounded-md">应用服务</button>
+                <button class="px-3 py-1 bg-white bg-opacity-20 rounded-md">发布渠道</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main content -->
+    <div class="flex-1 flex overflow-hidden">
+        <!-- Left side - Document editor area -->
+        <div class="flex-1 flex flex-col bg-white dark:bg-gray-800 overflow-hidden border-r border-gray-200 dark:border-gray-700">
+            <!-- Editor toolbar -->
+            <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                <div class="flex items-center space-x-4">
+                    <button class="text-gray-600 dark:text-gray-300">搜索词</button>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button class="text-gray-600 dark:text-gray-300">自 检测</button>
+                    <button class="text-gray-600 dark:text-gray-300">词 优化</button>
+                    <div class="relative">
+                        <button class="text-gray-600 dark:text-gray-300 flex items-center">文本对话 <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Document content -->
+            <div class="flex-1 p-4 overflow-auto">
+                <div class="space-y-4 text-gray-700 dark:text-gray-300">
+                    <p class="font-bold"># 简介</p>
+                    <p>创建一个专业的空气质量分析仪，讲解各地区城市的空气质量天气，并生成可视化图表。</p>
+                    
+                    <p class="font-bold"># 技能</p>
+                    <p>## 技能 1: 查询城市气候</p>
+                    <p>- 使用Amap Maps查询MCP服务，查询任意国内城市的实时空气质量。</p>
+                    <p>- 可以详细展示包括PM2.5，温度，风速，和湿度等天气指标。</p>
+                    
+                    <p class="font-bold"># 技能 2: 生成数据可视化</p>
+                    <p>- 调查细节的空气质量使用QuickChart的MCP服务呈现为多种图表可视化展示。</p>
+                    <p>- 可视化形式包括折线图，柱状图，气泡图等形式，轻松看清不同城市的空气质量差异。</p>
+                    <p>- 海伦图表展示，突出显示变化。</p>
+                    
+                    <p class="font-bold"># 技能 3: 提供空气分析报告</p>
+                </div>
+            </div>
+
+            <!-- Document footer -->
+            <div class="p-4 border-t border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                <div class="text-sm text-gray-500 dark:text-gray-400">
+                    470 / 128000
+                </div>
+                <div class="flex items-center space-x-2">
+                    <button class="text-sm text-gray-500 dark:text-gray-400">整理</button>
+                </div>
+            </div>
+
+            <!-- Bottom toolbar -->
+            <div class="border-t border-gray-200 dark:border-gray-700 p-2">
+                <div class="flex flex-col space-y-2">
+                    <div class="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
+                        <span>创世</span>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" value="" class="sr-only peer">
+                            <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-primary"></div>
+                        </label>
+                    </div>
+                    <div class="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
+                        <span>知识图谱</span>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" value="" class="sr-only peer">
+                            <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-primary"></div>
+                        </label>
+                    </div>
+                    <div class="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
+                        <span>动态文件解析</span>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" value="" class="sr-only peer">
+                            <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-primary"></div>
+                        </label>
+                    </div>
+                    <div class="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
+                        <span>智能搜索</span>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" value="" class="sr-only peer">
+                            <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-primary"></div>
+                        </label>
+                    </div>
+                    <div class="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
+                        <span>转角度</span>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" value="" class="sr-only peer">
+                            <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-primary"></div>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <p class="text-sm text-gray-600 dark:text-gray-400">特性</p>
+                    <div class="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400 mt-2">
+                        <span>MCP服务</span>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" value="" class="sr-only peer" checked>
+                            <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-primary"></div>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="border-t border-gray-200 dark:border-gray-700 mt-4 pt-4">
+                    <div class="flex items-center">
+                        <div class="flex items-center">
+                            <span class="w-6 h-6 flex items-center justify-center bg-red-500 text-white rounded-full text-xs">1</span>
+                            <button class="ml-2 px-3 py-1 border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 rounded-md flex items-center">
+                                <span>+ MCP</span>
+                            </button>
+                        </div>
+                        <div class="ml-auto flex items-center">
+                            <button class="text-xs text-primary">工具123</button>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4 flex flex-col space-y-1">
+                        <div class="flex items-center p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md">
+                            <svg class="w-5 h-5 text-red-500" viewBox="0 0 24 24" fill="currentColor"><path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm0-2a8 8 0 1 0 0-16 8 8 0 0 0 0 16zm-.997-4L6.76 11.757l1.414-1.414 2.829 2.829 5.656-5.657 1.415 1.414L11.003 16z"/></svg>
+                            <span class="ml-2 text-sm text-gray-600 dark:text-gray-400">Amap Maps</span>
+                        </div>
+                        <div class="flex items-center p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md">
+                            <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" viewBox="0 0 24 24" fill="currentColor"><path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm0-2a8 8 0 1 0 0-16 8 8 0 0 0 0 16zm-.997-4L6.76 11.757l1.414-1.414 2.829 2.829 5.656-5.657 1.415 1.414L11.003 16z"/></svg>
+                            <span class="ml-2 text-sm text-gray-600 dark:text-gray-400">QuickChart</span>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4 border-t border-gray-200 dark:border-gray-700 pt-4">
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-gray-600 dark:text-gray-400">编辑</span>
+                            <div class="flex items-center">
+                                <button class="text-primary">+ 添加</button>
+                            </div>
+                        </div>
+                        <div class="mt-2">
+                            <div class="flex items-center p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md">
+                                <span class="text-sm text-gray-600 dark:text-gray-400">清单</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right side - MCP Services modal -->
+        <div class="w-80 md:w-96 bg-white dark:bg-gray-800 shadow-lg overflow-y-auto">
+            <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                <h2 class="font-bold text-lg text-gray-800 dark:text-gray-200">选择MCP服务</h2>
+                <button id="closeModal" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <!-- Search bar -->
+            <div class="p-4 border-b border-gray-200 dark:border-gray-700">
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                        <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
+                        </svg>
+                    </div>
+                    <input type="search" class="block w-full p-2 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-primary focus:border-primary dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" placeholder="名称搜索" required>
+                </div>
+            </div>
+            
+            <!-- Tabs -->
+            <div class="flex border-b border-gray-200 dark:border-gray-700">
+                <button class="flex-1 py-3 px-4 text-center border-b-2 border-primary text-primary font-medium">MCP 广场</button>
+                <button class="flex-1 py-3 px-4 text-center text-gray-500 dark:text-gray-400">自定义MCP</button>
+            </div>
+            
+            <!-- Categories -->
+            <div class="flex space-x-2 p-2 text-sm overflow-x-auto whitespace-nowrap border-b border-gray-200 dark:border-gray-700">
+                <button class="px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded-full text-gray-700 dark:text-gray-300">全部服务</button>
+                <button class="px-3 py-1 rounded-full text-gray-700 dark:text-gray-300">已开通</button>
+                <button class="px-3 py-1 rounded-full text-gray-700 dark:text-gray-300">未开通</button>
+            </div>
+            
+            <!-- Service list -->
+            <div class="p-4 space-y-4">
+                <!-- Amap Maps -->
+                <div class="service-item p-3 rounded-lg border border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                    <div class="flex items-start space-x-3">
+                        <div class="flex-shrink-0">
+                            <div class="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center">
+                                <svg class="w-5 h-5 text-red-500" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex items-center">
+                                <span class="font-medium text-gray-900 dark:text-white">Amap Maps</span>
+                                <div class="ml-2 flex items-center">
+                                    <span class="w-4 h-4 rounded-full bg-red-500 flex items-center justify-center">
+                                        <svg class="w-3 h-3 text-white" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm-1-11v6h2v-6h-2zm0-4v2h2V7h-2z"/>
+                                        </svg>
+                                    </span>
+                                </div>
+                            </div>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Amap Maps 是高德提供的大型地图服务，帮助查询地图和地点信息，包括路径规划和位置服务。</p>
+                        </div>
+                    </div>
+                    <button class="px-3 py-1 text-xs text-white bg-primary rounded-md hover:bg-opacity-90">立即开通</button>
+                </div>
+                
+                <!-- EverArt -->
+                <div class="service-item p-3 rounded-lg border border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                    <div class="flex items-start space-x-3">
+                        <div class="flex-shrink-0">
+                            <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+                                <svg class="w-5 h-5 text-blue-500" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm0-18c-4.418 0-8 3.582-8 8 0 .362.043.711.11 1.054 1.496-1.226 2.849-1.773 4.148-1.772 1.816 0 3.365 1.114 5.099 2.541 1.534 1.264 3.313 2.733 5.252 2.733.309 0 .621-.03.934-.089A7.958 7.958 0 0 0 20 12c0-4.418-3.582-8-8-8z"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex items-center">
+                                <span class="font-medium text-gray-900 dark:text-white">EverArt</span>
+                            </div>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">创作TUNDRA绘画 AI 图像生成工具，可以绘制各种艺术图像。Plus 等会员使用无限额度。</p>
+                        </div>
+                    </div>
+                    <button class="px-3 py-1 text-xs text-white bg-primary rounded-md hover:bg-opacity-90">立即开通</button>
+                </div>
+                
+                <!-- Notion -->
+                <div class="service-item p-3 rounded-lg border border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                    <div class="flex items-start space-x-3">
+                        <div class="flex-shrink-0">
+                            <div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
+                                <svg class="w-5 h-5 text-gray-800 dark:text-gray-200" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zm0 2v12h16V6H4zm2 3h12v2H6V9zm0 4h10v2H6v-2z"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex items-center">
+                                <span class="font-medium text-gray-900 dark:text-white">Notion</span>
+                            </div>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">同步到Notion来查看和使用 Notion API 同步，使用 AI 操作管理你的 Notion 文档和空间。</p>
+                        </div>
+                    </div>
+                    <button class="px-3 py-1 text-xs text-white bg-primary rounded-md hover:bg-opacity-90">立即开通</button>
+                </div>
+                
+                <!-- GitHub -->
+                <div class="service-item p-3 rounded-lg border border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                    <div class="flex items-start space-x-3">
+                        <div class="flex-shrink-0">
+                            <div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
+                                <svg class="w-5 h-5 text-gray-800 dark:text-gray-200" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.167 6.839 9.489.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.605-3.369-1.343-3.369-1.343-.454-1.156-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0 1 12 6.844a9.59 9.59 0 0 1 2.504.337c1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.699 1.028 1.592 1.028 2.683 0 3.841-2.337 4.687-4.565 4.935.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0 0 22 12c0-5.523-4.477-10-10-10z"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex items-center">
+                                <span class="font-medium text-gray-900 dark:text-white">GitHub</span>
+                            </div>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">GitHub 专用的智能助手。为开发人员提供更深层次的 GitHub 项目解读和代码理解。</p>
+                        </div>
+                    </div>
+                    <button class="px-3 py-1 text-xs text-white bg-primary rounded-md hover:bg-opacity-90">立即开通</button>
+                </div>
+                
+                <!-- Firecrawl -->
+                <div class="service-item p-3 rounded-lg border border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                    <div class="flex items-start space-x-3">
+                        <div class="flex-shrink-0">
+                            <div class="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center">
+                                <svg class="w-5 h-5 text-orange-500" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 23a7.5 7.5 0 0 1-5.138-12.963C8.204 8.774 11.5 6.5 11 1.5c6 4 9 8 3 14 1 0 2.5 0 5-2.47.27.773.5 1.604.5 2.47A7.5 7.5 0 0 1 12 23z"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex items-center">
+                                <span class="font-medium text-gray-900 dark:text-white">Firecrawl</span>
+                            </div>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Firecrawl 专项对网站的爬虫，支持各种网站，每个兔组都可能的网页爬虫和网址解析。</p>
+                        </div>
+                    </div>
+                    <button class="px-3 py-1 text-xs text-white bg-primary rounded-md hover:bg-opacity-90">立即开通</button>
+                </div>
+                
+                <!-- Perplexity Ask -->
+                <div class="service-item p-3 rounded-lg border border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                    <div class="flex items-start space-x-3">
+                        <div class="flex-shrink-0">
+                            <div class="w-8 h-8 rounded-full bg-teal-100 flex items-center justify-center">
+                                <svg class="w-5 h-5 text-teal-500" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M20.222 9.16h-1.334c.015-.09.028-.182.028-.277V6.57c0-.98-.797-1.777-1.778-1.777H3.5V3.358a.75.75 0 0 0-1.5 0V20.83a.75.75 0 0 0 1.5 0v-1.434h10.556a1.78 1.78 0 0 0 1.778-1.777v-2.313c0-.095-.014-.187-.028-.278h4.417a1.78 1.78 0 0 0 1.778-1.777v-2.314a1.78 1.78 0 0 0-1.778-1.78h-.001zM17.14 6.293c.152 0 .277.124.277.277v2.31a.28.28 0 0 1-.278.28H3.5V6.29h13.64v.003zm-2.807 9.014v2.312a.278.278 0 0 1-.278.277H3.5v-2.868h10.556c.153 0 .277.126.277.28v-.001zM20.5 13.25a.278.278 0 0 1-.278.277H3.5V10.66h16.722c.153 0 .278.124.278.277v2.313z"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex items-center">
+                                <span class="font-medium text-gray-900 dark:text-white">Perplexity Ask</span>
+                            </div>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Perplexity 是一款依赖在线信息处理，通过自动合成多个问题创建可靠的搜索引擎回答。</p>
+                        </div>
+                    </div>
+                    <button class="px-3 py-1 text-xs text-white bg-primary rounded-md hover:bg-opacity-90">立即开通</button>
+                </div>
+                
+                <!-- QuickChart -->
+                <div class="service-item p-3 rounded-lg border border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                    <div class="flex items-start space-x-3">
+                        <div class="flex-shrink-0">
+                            <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
+                                <svg class="w-5 h-5 text-green-500" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm0 2v14h14V5H5zm2 2h2v10H7V7zm4 2h2v8h-2V9zm4 2h2v6h-2v-6z"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex items-center">
+                                <span class="font-medium text-gray-900 dark:text-white">QuickChart</span>
+                                <div class="ml-2 flex items-center">
+                                    <span class="w-4 h-4 rounded-full bg-red-500 flex items-center justify-center">
+                                        <svg class="w-3 h-3 text-white" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm-1-11v6h2v-6h-2zm0-4v2h2V7h-2z"/>
+                                        </svg>
+                                    </span>
+                                </div>
+                            </div>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">可生成各种各样的统计图、图表数据，使用 QuickChart 生成各种专业的图表效果图。</p>
+                        </div>
+                    </div>
+                    <button class="px-3 py-1 text-xs text-white bg-primary rounded-md hover:bg-opacity-90">立即开通</button>
+                </div>
+                
+                <!-- Flomo -->
+                <div class="service-item p-3 rounded-lg border border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                    <div class="flex items-start space-x-3">
+                        <div class="flex-shrink-0">
+                            <div class="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center">
+                                <svg class="w-5 h-5 text-emerald-500" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M17 3h4a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h4V1h2v2h6V1h2v2zm-2 2H9v2H7V5H4v4h16V5h-3v2h-2V5zm5 6H4v8h16v-8z"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex items-center">
+                                <span class="font-medium text-gray-900 dark:text-white">Flomo</span>
+                            </div>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Flomo 浮墨笔记可以帮你快速记录笔记，支持卡片式 AI 帮助笔记 Flomo 内容管理和收集。还提供...</p>
+                        </div>
+                    </div>
+                    <button class="px-3 py-1 text-xs text-white bg-primary rounded-md hover:bg-opacity-90">立即开通</button>
+                </div>
+            </div>
+            
+            <!-- Footer -->
+            <div class="p-4 border-t border-gray-200 dark:border-gray-700 flex justify-between">
+                <button class="text-xs text-gray-500 dark:text-gray-400">赞助可用</button>
+                <button class="text-xs text-gray-500 dark:text-gray-400">回到首页</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('closeModal').addEventListener('click', function() {
+            // In a real app, this would close the modal
+            // For demo purposes, we'll just add a notification
+            alert('This is a demo. In a real app, this would close the modal.');
+        });
+        
+        // Make service items clickable
+        document.querySelectorAll('.service-item').forEach(item => {
+            item.addEventListener('click', function(e) {
+                // Don't trigger if the button was clicked
+                if (e.target.tagName === 'BUTTON' || e.target.closest('button')) {
+                    return;
+                }
+                
+                // Toggle a selected class or perform an action
+                this.classList.toggle('border-primary');
+            });
+        });
+    </script>
+</body>
+</html>
