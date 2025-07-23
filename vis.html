@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LangGraph Agent Visualizer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .node {
+            cursor: move;
+            transition: all 0.2s ease;
+        }
+        .node:hover {
+            filter: brightness(1.1);
+        }
+        .node.dragging {
+            filter: brightness(1.2);
+            transform: scale(1.05);
+        }
+        .edge {
+            pointer-events: none;
+            transition: all 0.2s ease;
+        }
+        .grid-pattern {
+            background-image: 
+                linear-gradient(rgba(0, 0, 0, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 0, 0, 0.1) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        .dark .grid-pattern {
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+        }
+    </style>
+</head>
+<body class="bg-white dark:bg-gray-900 min-h-screen">
+    <div class="container mx-auto p-4">
+        <div class="mb-6">
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">LangGraph Agent Visualizer</h1>
+            <p class="text-gray-600 dark:text-gray-400">Drag nodes to reposition them in the workflow</p>
+        </div>
+        
+        <div class="bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <div class="p-4 border-b border-gray-200 dark:border-gray-700">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Agent Workflow</h2>
+                    <div class="flex space-x-2">
+                        <button id="resetBtn" class="px-3 py-1 text-sm bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors">
+                            Reset Layout
+                        </button>
+                        <button id="centerBtn" class="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors">
+                            Center View
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="relative w-full h-96 md:h-[600px] grid-pattern overflow-hidden">
+                <svg id="graphSvg" class="w-full h-full">
+                    <!-- Edges will be drawn here -->
+                    <defs>
+                        <marker id="arrowhead" markerWidth="10" markerHeight="7" 
+                                refX="9" refY="3.5" orient="auto">
+                            <polygon points="0 0, 10 3.5, 0 7" 
+                                     class="fill-gray-600 dark:fill-gray-400" />
+                        </marker>
+                    </defs>
+                </svg>
+            </div>
+        </div>
+        
+        <div class="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Node Types</h3>
+                <div class="space-y-2 text-sm">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                        <span class="text-gray-600 dark:text-gray-400">Start/End</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <div class="w-3 h-3 bg-blue-500 rounded-full"></div>
+                        <span class="text-gray-600 dark:text-gray-400">LLM</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <div class="w-3 h-3 bg-purple-500 rounded-full"></div>
+                        <span class="text-gray-600 dark:text-gray-400">Tools</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <div class="w-3 h-3 bg-orange-500 rounded-full"></div>
+                        <span class="text-gray-600 dark:text-gray-400">Decision</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Instructions</h3>
+                <ul class="text-sm text-gray-600 dark:text-gray-400 space-y-1">
+                    <li>• Click and drag nodes to move them</li>
+                    <li>• Edges automatically update</li>
+                    <li>• Use reset to restore layout</li>
+                </ul>
+            </div>
+            
+            <div class="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Workflow Stats</h3>
+                <div class="text-sm text-gray-600 dark:text-gray-400 space-y-1">
+                    <div>Nodes: <span id="nodeCount">7</span></div>
+                    <div>Edges: <span id="edgeCount">8</span></div>
+                    <div>Layers: <span id="layerCount">4</span></div>
+                </div>
+            </div>
+            
+            <div class="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Agent Type</h3>
+                <div class="text-sm text-gray-600 dark:text-gray-400">
+                    <div class="font-medium text-gray-900 dark:text-white">ReAct Agent</div>
+                    <div>Reasoning + Acting pattern with tool usage and decision loops</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Dark mode detection
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.classList.add('dark');
+        }
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+            if (event.matches) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        });
+
+        // Graph data structure
+        const nodes = [
+            { id: 'start', label: 'Start', type: 'start', x: 100, y: 50, color: '#10B981' },
+            { id: 'receive_input', label: 'Receive Input', type: 'llm', x: 100, y: 120, color: '#3B82F6' },
+            { id: 'analyze', label: 'Analyze Query', type: 'llm', x: 100, y: 190, color: '#3B82F6' },
+            { id: 'decision', label: 'Need Tools?', type: 'decision', x: 100, y: 260, color: '#F59E0B' },
+            { id: 'use_tools', label: 'Use Tools', type: 'tool', x: 250, y: 260, color: '#8B5CF6' },
+            { id: 'generate_response', label: 'Generate Response', type: 'llm', x: 100, y: 330, color: '#3B82F6' },
+            { id: 'end', label: 'End', type: 'end', x: 100, y: 400, color: '#10B981' }
+        ];
+
+        const edges = [
+            { from: 'start', to: 'receive_input' },
+            { from: 'receive_input', to: 'analyze' },
+            { from: 'analyze', to: 'decision' },
+            { from: 'decision', to: 'use_tools', label: 'Yes' },
+            { from: 'decision', to: 'generate_response', label: 'No' },
+            { from: 'use_tools', to: 'analyze', label: 'Loop' },
+            { from: 'use_tools', to: 'generate_response' },
+            { from: 'generate_response', to: 'end' }
+        ];
+
+        // Store original positions for reset
+        const originalPositions = nodes.map(node => ({ id: node.id, x: node.x, y: node.y }));
+
+        const svg = document.getElementById('graphSvg');
+        let isDragging = false;
+        let draggedNode = null;
+        let offset = { x: 0, y: 0 };
+
+        function createNode(node) {
+            const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+            group.classList.add('node');
+            group.setAttribute('data-id', node.id);
+            group.setAttribute('transform', `translate(${node.x}, ${node.y})`);
+
+            // Node background
+            const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+            rect.setAttribute('width', '120');
+            rect.setAttribute('height', '40');
+            rect.setAttribute('rx', '8');
+            rect.setAttribute('fill', node.color);
+            rect.setAttribute('stroke', '#374151');
+            rect.setAttribute('stroke-width', '2');
+
+            // Node label
+            const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            text.setAttribute('x', '60');
+            text.setAttribute('y', '25');
+            text.setAttribute('text-anchor', 'middle');
+            text.setAttribute('dominant-baseline', 'middle');
+            text.setAttribute('fill', 'white');
+            text.setAttribute('font-family', 'ui-sans-serif, system-ui, sans-serif');
+            text.setAttribute('font-size', '12');
+            text.setAttribute('font-weight', '600');
+            text.textContent = node.label;
+
+            group.appendChild(rect);
+            group.appendChild(text);
+
+            // Add drag event listeners
+            group.addEventListener('mousedown', startDrag);
+            group.addEventListener('touchstart', startDrag);
+
+            return group;
+        }
+
+        function createEdge(edge) {
+            const fromNode = nodes.find(n => n.id === edge.from);
+            const toNode = nodes.find(n => n.id === edge.to);
+            
+            if (!fromNode || !toNode) return null;
+
+            const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+            group.classList.add('edge');
+            group.setAttribute('data-from', edge.from);
+            group.setAttribute('data-to', edge.to);
+
+            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            line.setAttribute('stroke', '#6B7280');
+            line.setAttribute('stroke-width', '2');
+            line.setAttribute('marker-end', 'url(#arrowhead)');
+
+            group.appendChild(line);
+
+            // Add label if present
+            if (edge.label) {
+                const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                text.setAttribute('font-family', 'ui-sans-serif, system-ui, sans-serif');
+                text.setAttribute('font-size', '10');
+                text.setAttribute('fill', '#6B7280');
+                text.setAttribute('text-anchor', 'middle');
+                text.textContent = edge.label;
+                group.appendChild(text);
+            }
+
+            return group;
+        }
+
+        function updateEdge(edgeElement, edge) {
+            const fromNode = nodes.find(n => n.id === edge.from);
+            const toNode = nodes.find(n => n.id === edge.to);
+            
+            if (!fromNode || !toNode) return;
+
+            const line = edgeElement.querySelector('line');
+            const text = edgeElement.querySelector('text');
+
+            // Calculate connection points
+            let x1 = fromNode.x + 60;
+            let y1 = fromNode.y + 40;
+            let x2 = toNode.x + 60;
+            let y2 = toNode.y;
+
+            // Adjust for different directions
+            if (edge.from === 'decision' && edge.to === 'use_tools') {
+                x1 = fromNode.x + 120;
+                y1 = fromNode.y + 20;
+                x2 = toNode.x;
+                y2 = toNode.y + 20;
+            } else if (edge.from === 'use_tools' && edge.to === 'analyze') {
+                x1 = toNode.x + 120;
+                y1 = fromNode.y + 20;
+                x2 = toNode.x + 120;
+                y2 = toNode.y + 40;
+            }
+
+            line.setAttribute('x1', x1);
+            line.setAttribute('y1', y1);
+            line.setAttribute('x2', x2);
+            line.setAttribute('y2', y2);
+
+            if (text) {
+                text.setAttribute('x', (x1 + x2) / 2);
+                text.setAttribute('y', (y1 + y2) / 2 - 5);
+            }
+        }
+
+        function renderGraph() {
+            // Clear existing content
+            svg.innerHTML = `
+                <defs>
+                    <marker id="arrowhead" markerWidth="10" markerHeight="7" 
+                            refX="9" refY="3.5" orient="auto">
+                        <polygon points="0 0, 10 3.5, 0 7" 
+                                 class="fill-gray-600 dark:fill-gray-400" />
+                    </marker>
+                </defs>
+            `;
+
+            // Create edges first (so they appear behind nodes)
+            edges.forEach(edge => {
+                const edgeElement = createEdge(edge);
+                if (edgeElement) {
+                    svg.appendChild(edgeElement);
+                    updateEdge(edgeElement, edge);
+                }
+            });
+
+            // Create nodes
+            nodes.forEach(node => {
+                const nodeElement = createNode(node);
+                svg.appendChild(nodeElement);
+            });
+        }
+
+        function updateAllEdges() {
+            const edgeElements = svg.querySelectorAll('.edge');
+            edgeElements.forEach(edgeElement => {
+                const from = edgeElement.getAttribute('data-from');
+                const to = edgeElement.getAttribute('data-to');
+                const edge = edges.find(e => e.from === from && e.to === to);
+                if (edge) {
+                    updateEdge(edgeElement, edge);
+                }
+            });
+        }
+
+        function startDrag(e) {
+            e.preventDefault();
+            isDragging = true;
+            draggedNode = e.currentTarget;
+            draggedNode.classList.add('dragging');
+
+            const rect = svg.getBoundingClientRect();
+            const clientX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
+            const clientY = e.type === 'touchstart' ? e.touches[0].clientY : e.clientY;
+            
+            const svgPoint = getSVGPoint(clientX, clientY);
+            const nodeId = draggedNode.getAttribute('data-id');
+            const node = nodes.find(n => n.id === nodeId);
+            
+            offset.x = svgPoint.x - node.x;
+            offset.y = svgPoint.y - node.y;
+
+            document.addEventListener('mousemove', drag);
+            document.addEventListener('mouseup', endDrag);
+            document.addEventListener('touchmove', drag);
+            document.addEventListener('touchend', endDrag);
+        }
+
+        function drag(e) {
+            if (!isDragging || !draggedNode) return;
+            e.preventDefault();
+
+            const clientX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
+            const clientY = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
+            
+            const svgPoint = getSVGPoint(clientX, clientY);
+            const nodeId = draggedNode.getAttribute('data-id');
+            const node = nodes.find(n => n.id === nodeId);
+
+            node.x = Math.max(0, Math.min(svgPoint.x - offset.x, svg.clientWidth - 120));
+            node.y = Math.max(0, Math.min(svgPoint.y - offset.y, svg.clientHeight - 40));
+
+            draggedNode.setAttribute('transform', `translate(${node.x}, ${node.y})`);
+            updateAllEdges();
+        }
+
+        function endDrag() {
+            if (draggedNode) {
+                draggedNode.classList.remove('dragging');
+                draggedNode = null;
+            }
+            isDragging = false;
+
+            document.removeEventListener('mousemove', drag);
+            document.removeEventListener('mouseup', endDrag);
+            document.removeEventListener('touchmove', drag);
+            document.removeEventListener('touchend', endDrag);
+        }
+
+        function getSVGPoint(clientX, clientY) {
+            const rect = svg.getBoundingClientRect();
+            return {
+                x: clientX - rect.left,
+                y: clientY - rect.top
+            };
+        }
+
+        function resetLayout() {
+            originalPositions.forEach(pos => {
+                const node = nodes.find(n => n.id === pos.id);
+                if (node) {
+                    node.x = pos.x;
+                    node.y = pos.y;
+                }
+            });
+            renderGraph();
+        }
+
+        function centerView() {
+            const svgRect = svg.getBoundingClientRect();
+            const centerX = svgRect.width / 2;
+            const centerY = svgRect.height / 2;
+
+            // Calculate current graph bounds
+            const minX = Math.min(...nodes.map(n => n.x));
+            const maxX = Math.max(...nodes.map(n => n.x + 120));
+            const minY = Math.min(...nodes.map(n => n.y));
+            const maxY = Math.max(...nodes.map(n => n.y + 40));
+
+            const graphCenterX = (minX + maxX) / 2;
+            const graphCenterY = (minY + maxY) / 2;
+
+            const offsetX = centerX - graphCenterX;
+            const offsetY = centerY - graphCenterY;
+
+            nodes.forEach(node => {
+                node.x += offsetX;
+                node.y += offsetY;
+                
+                // Keep within bounds
+                node.x = Math.max(0, Math.min(node.x, svgRect.width - 120));
+                node.y = Math.max(0, Math.min(node.y, svgRect.height - 40));
+            });
+
+            renderGraph();
+        }
+
+        // Event listeners
+        document.getElementById('resetBtn').addEventListener('click', resetLayout);
+        document.getElementById('centerBtn').addEventListener('click', centerView);
+
+        // Prevent context menu on long press
+        svg.addEventListener('contextmenu', e => e.preventDefault());
+
+        // Initial render
+        renderGraph();
+        
+        // Center the graph initially
+        setTimeout(centerView, 100);
+    </script>
+</body>
+</html>
