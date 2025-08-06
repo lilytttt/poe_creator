@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Knowledge Base File Manager</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#5D5CDE',
+                        'primary-hover': '#4F4ED1',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-white dark:bg-gray-900 text-gray-900 dark:text-white min-h-screen">
+    <div id="app" class="container mx-auto px-4 py-8 max-w-6xl">
+        <!-- Header -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                <i class="fas fa-database text-primary mr-3"></i>
+                Knowledge Base Files
+            </h1>
+            <p class="text-gray-600 dark:text-gray-400">Manage your uploaded files and add new ones with metadata</p>
+        </div>
+
+        <!-- Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+            <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+                <div class="flex items-center">
+                    <i class="fas fa-file text-primary text-2xl mr-3"></i>
+                    <div>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Total Files</p>
+                        <p class="text-2xl font-bold" id="totalFiles">0</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+                <div class="flex items-center">
+                    <i class="fas fa-hdd text-green-500 text-2xl mr-3"></i>
+                    <div>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Total Size</p>
+                        <p class="text-2xl font-bold" id="totalSize">0 MB</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+                <div class="flex items-center">
+                    <i class="fas fa-clock text-blue-500 text-2xl mr-3"></i>
+                    <div>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Last Updated</p>
+                        <p class="text-sm font-semibold" id="lastUpdated">Never</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex flex-col sm:flex-row gap-4 mb-6">
+            <button id="addFilesBtn" class="bg-primary hover:bg-primary-hover text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center justify-center">
+                <i class="fas fa-plus mr-2"></i>
+                Add New Files
+            </button>
+            <button id="selectAllBtn" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center justify-center">
+                <i class="fas fa-check-square mr-2"></i>
+                Select All
+            </button>
+            <button id="deleteSelectedBtn" class="bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                <i class="fas fa-trash mr-2"></i>
+                Delete Selected
+            </button>
+        </div>
+
+        <!-- File List -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                <h2 class="text-xl font-semibold">Uploaded Files</h2>
+            </div>
+            <div id="fileList" class="divide-y divide-gray-200 dark:divide-gray-700">
+                <!-- Files will be rendered here -->
+            </div>
+        </div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="text-center py-12 hidden">
+            <i class="fas fa-folder-open text-gray-400 text-6xl mb-4"></i>
+            <h3 class="text-xl font-semibold text-gray-600 dark:text-gray-400 mb-2">No files uploaded yet</h3>
+            <p class="text-gray-500 dark:text-gray-500 mb-6">Start by adding some files to your knowledge base</p>
+            <button onclick="document.getElementById('addFilesBtn').click()" class="bg-primary hover:bg-primary-hover text-white px-6 py-3 rounded-lg font-semibold transition-colors">
+                <i class="fas fa-plus mr-2"></i>
+                Add Your First File
+            </button>
+        </div>
+    </div>
+
+    <!-- File Upload Modal -->
+    <div id="uploadModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                <h3 class="text-xl font-semibold">Add New Files</h3>
+            </div>
+            
+            <!-- Step 1: File Selection -->
+            <div id="step1" class="p-6">
+                <div class="mb-6">
+                    <label class="block text-sm font-medium mb-2">Select Files</label>
+                    <div class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center hover:border-primary transition-colors">
+                        <input type="file" id="fileInput" multiple class="hidden" accept=".pdf,.doc,.docx,.txt,.md,.html,.csv,.json,.xml">
+                        <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-4"></i>
+                        <p class="text-lg font-medium text-gray-600 dark:text-gray-400 mb-2">
+                            Drop files here or click to browse
+                        </p>
+                        <p class="text-sm text-gray-500">Supports PDF, DOC, TXT, MD, HTML, CSV, JSON, XML</p>
+                        <button type="button" onclick="document.getElementById('fileInput').click()" class="mt-4 bg-primary hover:bg-primary-hover text-white px-6 py-2 rounded-lg font-medium transition-colors">
+                            Choose Files
+                        </button>
+                    </div>
+                </div>
+
+                <div id="selectedFiles" class="hidden">
+                    <h4 class="font-medium mb-3">Selected Files:</h4>
+                    <div id="selectedFilesList" class="space-y-2 mb-6">
+                        <!-- Selected files will appear here -->
+                    </div>
+                </div>
+
+                <div class="flex justify-end space-x-3">
+                    <button id="cancelUpload" class="px-6 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg font-medium transition-colors">
+                        Cancel
+                    </button>
+                    <button id="continueToMetadata" class="px-6 py-2 bg-primary hover:bg-primary-hover text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                        Continue to Metadata
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 2: Metadata -->
+            <div id="step2" class="p-6 hidden">
+                <div class="mb-6">
+                    <h4 class="font-medium mb-4">Add Metadata for Each File</h4>
+                    <div id="metadataForms" class="space-y-6">
+                        <!-- Metadata forms will be generated here -->
+                    </div>
+                </div>
+
+                <div class="flex justify-between">
+                    <button id="backToFiles" class="px-6 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg font-medium transition-colors">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        Back to Files
+                    </button>
+                    <div class="space-x-3">
+                        <button id="cancelUpload2" class="px-6 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg font-medium transition-colors">
+                            Cancel
+                        </button>
+                        <button id="confirmUpload" class="px-6 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg font-medium transition-colors">
+                            <i class="fas fa-upload mr-2"></i>
+                            Upload Files
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Dark mode setup
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.classList.add('dark');
+        }
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+            if (event.matches) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        });
+
+        // App State
+        let files = [
+            {
+                id: 1,
+                name: "User Manual.pdf",
+                size: 2.4,
+                type: "PDF",
+                uploadDate: "2024-01-15",
+                category: "Documentation",
+                description: "Complete user manual for the system",
+                tags: ["manual", "guide", "documentation"]
+            },
+            {
+                id: 2,
+                name: "API Documentation.md",
+                size: 0.8,
+                type: "Markdown",
+                uploadDate: "2024-01-14",
+                category: "Technical",
+                description: "API endpoints and usage examples",
+                tags: ["api", "technical", "reference"]
+            },
+            {
+                id: 3,
+                name: "FAQ.txt",
+                size: 0.3,
+                type: "Text",
+                uploadDate: "2024-01-13",
+                category: "Support",
+                description: "Frequently asked questions",
+                tags: ["faq", "support", "help"]
+            }
+        ];
+
+        let selectedFiles = new Set();
+        let pendingFiles = [];
+
+        // Utility Functions
+        function formatFileSize(mb) {
+            if (mb < 1) {
+                return `${(mb * 1024).toFixed(0)} KB`;
+            }
+            return `${mb.toFixed(1)} MB`;
+        }
+
+        function formatDate(dateString) {
+            return new Date(dateString).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+        }
+
+        function getFileIcon(type) {
+            const icons = {
+                'PDF': 'fas fa-file-pdf text-red-500',
+                'Markdown': 'fab fa-markdown text-blue-500',
+                'Text': 'fas fa-file-alt text-gray-500',
+                'DOC': 'fas fa-file-word text-blue-600',
+                'HTML': 'fab fa-html5 text-orange-500',
+                'CSV': 'fas fa-file-csv text-green-500',
+                'JSON': 'fas fa-file-code text-yellow-500',
+                'XML': 'fas fa-file-code text-purple-500'
+            };
+            return icons[type] || 'fas fa-file text-gray-400';
+        }
+
+        // Custom Dialog Functions
+        function showConfirmDialog(message, onConfirm) {
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+            modal.innerHTML = `
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg max-w-sm w-full mx-4">
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-exclamation-triangle text-yellow-500 text-xl mr-3"></i>
+                        <h3 class="text-lg font-semibold">Confirm Action</h3>
+                    </div>
+                    <p class="text-gray-700 dark:text-gray-300 mb-6">${message}</p>
+                    <div class="flex justify-end space-x-3">
+                        <button class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded font-medium transition-colors" onclick="this.closest('.fixed').remove()">
+                            Cancel
+                        </button>
+                        <button class="px-4 py-2 bg-red-500 text-white hover:bg-red-600 rounded font-medium transition-colors" onclick="this.closest('.fixed').remove(); (${onConfirm})()">
+                            Confirm
+                        </button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        function showAlert(message, type = 'info') {
+            const colors = {
+                'success': 'text-green-600 bg-green-50 border-green-200',
+                'error': 'text-red-600 bg-red-50 border-red-200',
+                'info': 'text-blue-600 bg-blue-50 border-blue-200'
+            };
+
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+            modal.innerHTML = `
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg max-w-sm w-full mx-4">
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-info-circle text-blue-500 text-xl mr-3"></i>
+                        <h3 class="text-lg font-semibold">Notice</h3>
+                    </div>
+                    <p class="text-gray-700 dark:text-gray-300 mb-6">${message}</p>
+                    <div class="flex justify-end">
+                        <button class="px-4 py-2 bg-primary hover:bg-primary-hover text-white rounded font-medium transition-colors" onclick="this.closest('.fixed').remove()">
+                            OK
+                        </button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        // Render Functions
+        function renderStats() {
+            const totalFiles = files.length;
+            const totalSize = files.reduce((sum, file) => sum + file.size, 0);
+            const lastUpdated = files.length > 0 ? 
+                Math.max(...files.map(f => new Date(f.uploadDate))) : null;
+
+            document.getElementById('totalFiles').textContent = totalFiles;
+            document.getElementById('totalSize').textContent = formatFileSize(totalSize);
+            document.getElementById('lastUpdated').textContent = lastUpdated ? 
+                formatDate(new Date(lastUpdated).toISOString().split('T')[0]) : 'Never';
+        }
+
+        function renderFiles() {
+            const fileList = document.getElementById('fileList');
+            const emptyState = document.getElementById('emptyState');
+
+            if (files.length === 0) {
+                fileList.style.display = 'none';
+                emptyState.classList.remove('hidden');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+            fileList.style.display = 'block';
+
+            fileList.innerHTML = files.map(file => `
+                <div class="p-6 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-4">
+                            <input type="checkbox" 
+                                   class="w-5 h-5 text-primary border-gray-300 rounded focus:ring-primary"
+                                   onchange="toggleFileSelection(${file.id}, this.checked)">
+                            <div class="flex items-center space-x-3">
+                                <i class="${getFileIcon(file.type)} text-2xl"></i>
+                                <div>
+                                    <h3 class="font-semibold text-lg">${file.name}</h3>
+                                    <div class="flex flex-wrap items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
+                                        <span><i class="fas fa-weight-hanging mr-1"></i>${formatFileSize(file.size)}</span>
+                                        <span><i class="fas fa-calendar mr-1"></i>${formatDate(file.uploadDate)}</span>
+                                        <span class="px-2 py-1 bg-gray-100 dark:bg-gray-600 rounded text-xs">${file.category}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <button onclick="viewFileDetails(${file.id})" 
+                                    class="p-2 text-gray-400 hover:text-primary transition-colors" 
+                                    title="View Details">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button onclick="deleteFile(${file.id})" 
+                                    class="p-2 text-gray-400 hover:text-red-500 transition-colors" 
+                                    title="Delete">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    ${file.description ? `
+                        <div class="mt-3 ml-12">
+                            <p class="text-gray-600 dark:text-gray-400 text-sm">${file.description}</p>
+                            ${file.tags && file.tags.length > 0 ? `
+                                <div class="flex flex-wrap gap-1 mt-2">
+                                    ${file.tags.map(tag => `
+                                        <span class="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded text-xs">#${tag}</span>
+                                    `).join('')}
+                                </div>
+                            ` : ''}
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('');
+
+            updateSelectionControls();
+        }
+
+        function updateSelectionControls() {
+            const selectAllBtn = document.getElementById('selectAllBtn');
+            const deleteSelectedBtn = document.getElementById('deleteSelectedBtn');
+            
+            const allSelected = files.length > 0 && selectedFiles.size === files.length;
+            selectAllBtn.innerHTML = allSelected ? 
+                '<i class="fas fa-square mr-2"></i>Deselect All' : 
+                '<i class="fas fa-check-square mr-2"></i>Select All';
+            
+            deleteSelectedBtn.disabled = selectedFiles.size === 0;
+        }
+
+        // Event Handlers
+        function toggleFileSelection(fileId, isSelected) {
+            if (isSelected) {
+                selectedFiles.add(fileId);
+            } else {
+                selectedFiles.delete(fileId);
+            }
+            updateSelectionControls();
+        }
+
+        function selectAllFiles() {
+            const checkboxes = document.querySelectorAll('#fileList input[type="checkbox"]');
+            const allSelected = selectedFiles.size === files.length;
+            
+            if (allSelected) {
+                selectedFiles.clear();
+                checkboxes.forEach(cb => cb.checked = false);
+            } else {
+                files.forEach(file => selectedFiles.add(file.id));
+                checkboxes.forEach(cb => cb.checked = true);
+            }
+            updateSelectionControls();
+        }
+
+        function deleteFile(fileId) {
+            const file = files.find(f => f.id === fileId);
+            showConfirmDialog(
+                `Are you sure you want to delete "${file.name}"? This action cannot be undone.`,
+                () => {
+                    files = files.filter(f => f.id !== fileId);
+                    selectedFiles.delete(fileId);
+                    renderFiles();
+                    renderStats();
+                    showAlert('File deleted successfully', 'success');
+                }
+            );
+        }
+
+        function deleteSelectedFiles() {
+            if (selectedFiles.size === 0) return;
+            
+            showConfirmDialog(
+                `Are you sure you want to delete ${selectedFiles.size} selected file(s)? This action cannot be undone.`,
+                () => {
+                    files = files.filter(f => !selectedFiles.has(f.id));
+                    selectedFiles.clear();
+                    renderFiles();
+                    renderStats();
+                    showAlert(`${selectedFiles.size} files deleted successfully`, 'success');
+                }
+            );
+        }
+
+        function viewFileDetails(fileId) {
+            const file = files.find(f => f.id === fileId);
+            showAlert(`
+                <div class="text-left">
+                    <h4 class="font-semibold mb-2">${file.name}</h4>
+                    <p><strong>Size:</strong> ${formatFileSize(file.size)}</p>
+                    <p><strong>Type:</strong> ${file.type}</p>
+                    <p><strong>Category:</strong> ${file.category}</p>
+                    <p><strong>Uploaded:</strong> ${formatDate(file.uploadDate)}</p>
+                    ${file.description ? `<p><strong>Description:</strong> ${file.description}</p>` : ''}
+                    ${file.tags && file.tags.length > 0 ? `<p><strong>Tags:</strong> ${file.tags.join(', ')}</p>` : ''}
+                </div>
+            `, 'info');
+        }
+
+        // Upload Modal Functions
+        function openUploadModal() {
+            document.getElementById('uploadModal').classList.remove('hidden');
+            resetUploadModal();
+        }
+
+        function closeUploadModal() {
+            document.getElementById('uploadModal').classList.add('hidden');
+            resetUploadModal();
+        }
+
+        function resetUploadModal() {
+            document.getElementById('step1').classList.remove('hidden');
+            document.getElementById('step2').classList.add('hidden');
+            document.getElementById('fileInput').value = '';
+            document.getElementById('selectedFiles').classList.add('hidden');
+            document.getElementById('continueToMetadata').disabled = true;
+            pendingFiles = [];
+        }
+
+        function handleFileSelection(event) {
+            const files = Array.from(event.target.files);
+            if (files.length === 0) return;
+
+            pendingFiles = files.map(file => ({
+                file,
+                name: file.name,
+                size: file.size / (1024 * 1024), // Convert to MB
+                type: getFileType(file.name),
+                category: '',
+                description: '',
+                tags: ''
+            }));
+
+            renderSelectedFiles();
+            document.getElementById('selectedFiles').classList.remove('hidden');
+            document.getElementById('continueToMetadata').disabled = false;
+        }
+
+        function getFileType(filename) {
+            const ext = filename.split('.').pop().toLowerCase();
+            const typeMap = {
+                'pdf': 'PDF',
+                'doc': 'DOC',
+                'docx': 'DOC',
+                'txt': 'Text',
+                'md': 'Markdown',
+                'html': 'HTML',
+                'csv': 'CSV',
+                'json': 'JSON',
+                'xml': 'XML'
+            };
+            return typeMap[ext] || 'Unknown';
+        }
+
+        function renderSelectedFiles() {
+            const container = document.getElementById('selectedFilesList');
+            container.innerHTML = pendingFiles.map((file, index) => `
+                <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded">
+                    <div class="flex items-center space-x-3">
+                        <i class="${getFileIcon(file.type)} text-xl"></i>
+                        <div>
+                            <p class="font-medium">${file.name}</p>
+                            <p class="text-sm text-gray-600 dark:text-gray-400">${formatFileSize(file.size)} • ${file.type}</p>
+                        </div>
+                    </div>
+                    <button onclick="removePendingFile(${index})" class="text-red-500 hover:text-red-600">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function removePendingFile(index) {
+            pendingFiles.splice(index, 1);
+            renderSelectedFiles();
+            
+            if (pendingFiles.length === 0) {
+                document.getElementById('selectedFiles').classList.add('hidden');
+                document.getElementById('continueToMetadata').disabled = true;
+            }
+        }
+
+        function showMetadataStep() {
+            document.getElementById('step1').classList.add('hidden');
+            document.getElementById('step2').classList.remove('hidden');
+            renderMetadataForms();
+        }
+
+        function renderMetadataForms() {
+            const container = document.getElementById('metadataForms');
+            container.innerHTML = pendingFiles.map((file, index) => `
+                <div class="border border-gray-200 dark:border-gray-600 rounded-lg p-4">
+                    <div class="flex items-center space-x-3 mb-4">
+                        <i class="${getFileIcon(file.type)} text-xl"></i>
+                        <div>
+                            <h5 class="font-semibold">${file.name}</h5>
+                            <p class="text-sm text-gray-600 dark:text-gray-400">${formatFileSize(file.size)} • ${file.type}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Category</label>
+                            <select class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary dark:bg-gray-700" 
+                                    onchange="updatePendingFileMetadata(${index}, 'category', this.value)">
+                                <option value="">Select category</option>
+                                <option value="Documentation">Documentation</option>
+                                <option value="Technical">Technical</option>
+                                <option value="Support">Support</option>
+                                <option value="Training">Training</option>
+                                <option value="Policy">Policy</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Tags (comma-separated)</label>
+                            <input type="text" 
+                                   class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary dark:bg-gray-700" 
+                                   placeholder="e.g. manual, guide, documentation"
+                                   onchange="updatePendingFileMetadata(${index}, 'tags', this.value)">
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <label class="block text-sm font-medium mb-1">Description</label>
+                        <textarea class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary dark:bg-gray-700" 
+                                  rows="2" 
+                                  placeholder="Brief description of the file content"
+                                  onchange="updatePendingFileMetadata(${index}, 'description', this.value)"></textarea>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function updatePendingFileMetadata(index, field, value) {
+            pendingFiles[index][field] = value;
+        }
+
+        function backToFileSelection() {
+            document.getElementById('step2').classList.add('hidden');
+            document.getElementById('step1').classList.remove('hidden');
+        }
+
+        function confirmUpload() {
+            // Simulate upload process
+            const newFiles = pendingFiles.map((pendingFile, index) => ({
+                id: Math.max(...files.map(f => f.id), 0) + index + 1,
+                name: pendingFile.name,
+                size: pendingFile.size,
+                type: pendingFile.type,
+                uploadDate: new Date().toISOString().split('T')[0],
+                category: pendingFile.category || 'Uncategorized',
+                description: pendingFile.description,
+                tags: pendingFile.tags ? pendingFile.tags.split(',').map(tag => tag.trim()) : []
+            }));
+
+            files.push(...newFiles);
+            renderFiles();
+            renderStats();
+            closeUploadModal();
+            showAlert(`Successfully uploaded ${newFiles.length} file(s)!`, 'success');
+        }
+
+        // Event Listeners
+        document.getElementById('addFilesBtn').addEventListener('click', openUploadModal);
+        document.getElementById('selectAllBtn').addEventListener('click', selectAllFiles);
+        document.getElementById('deleteSelectedBtn').addEventListener('click', deleteSelectedFiles);
+        
+        // Upload modal events
+        document.getElementById('cancelUpload').addEventListener('click', closeUploadModal);
+        document.getElementById('cancelUpload2').addEventListener('click', closeUploadModal);
+        document.getElementById('continueToMetadata').addEventListener('click', showMetadataStep);
+        document.getElementById('backToFiles').addEventListener('click', backToFileSelection);
+        document.getElementById('confirmUpload').addEventListener('click', confirmUpload);
+        document.getElementById('fileInput').addEventListener('change', handleFileSelection);
+
+        // Drag and drop support
+        const dropZone = document.querySelector('#step1 .border-dashed');
+        
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('border-primary');
+        });
+        
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('border-primary');
+        });
+        
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('border-primary');
+            document.getElementById('fileInput').files = e.dataTransfer.files;
+            handleFileSelection({ target: { files: e.dataTransfer.files } });
+        });
+
+        // Initial render
+        renderFiles();
+        renderStats();
+    </script>
+</body>
+</html>
